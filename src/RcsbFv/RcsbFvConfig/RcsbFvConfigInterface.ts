@@ -1,14 +1,14 @@
+import React from "react";
+import { LocationViewInterface } from "../../RcsbBoard/RcsbBoard";
 import {
     RcsbFvColorGradient,
     RcsbFvTrackData,
     RcsbFvTrackDataElementInterface
 } from "../../RcsbDataManager/RcsbDataManager";
-import {LocationViewInterface} from "../../RcsbBoard/RcsbBoard";
-import {RcsbFvDisplayTypes} from "./RcsbFvDefaultConfigValues";
-import React from "react";
-import {RcsbFvRowMarkPublicInterface} from "../RcsbFvRow/RcsbFvRowMark";
-import {RowTitleComponentType} from "../RcsbFvRow/RcsbFvRowTitle";
-import {RcsbFvTooltipInterface} from "../RcsbFvTooltip/RcsbFvTooltipInterface";
+import { RcsbFvRowMarkPublicInterface } from "../RcsbFvRow/RcsbFvRowMark";
+import { RowTitleComponentType } from "../RcsbFvRow/RcsbFvRowTitle";
+import { RcsbFvTooltipInterface } from "../RcsbFvTooltip/RcsbFvTooltipInterface";
+import { RcsbFvDisplayTypes } from "./RcsbFvDefaultConfigValues";
 
 /** Main PFV board configuration */
 export interface RcsbFvBoardConfigInterface {
@@ -111,6 +111,10 @@ export interface RcsbFvRowExtendedConfigInterface<
         R extends {[k:string]:any;} = {},
         M extends {[k:string]:any;} = {}
     > extends CommonConfigInterface{
+
+    /* An attached board element. */
+    boardRoot?: Document | ShadowRoot;
+
     /**DOM element Id where the PFV will be rendered*/
     boardId: string;
     /**Id used to identify the board track*/

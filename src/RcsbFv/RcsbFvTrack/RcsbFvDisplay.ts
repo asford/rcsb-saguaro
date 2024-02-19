@@ -1,33 +1,35 @@
-import {RcsbFvDisplayTypes} from '../RcsbFvConfig/RcsbFvDefaultConfigValues';
-import {RcsbFvDisplayConfigInterface, RcsbFvRowExtendedConfigInterface} from "../RcsbFvConfig/RcsbFvConfigInterface";
-import {RcsbDisplayInterface} from "../../RcsbBoard/RcsbDisplay/RcsbDisplayInterface";
-import {RcsbAxisDisplay} from "../../RcsbBoard/RcsbDisplay/RcsbAxisDisplay";
-import {RcsbPinDisplay} from "../../RcsbBoard/RcsbDisplay/RcsbPinDisplay";
-import {RcsbBondDisplay} from "../../RcsbBoard/RcsbDisplay/RcsbBondDisplay";
-import {RcsbFastSequenceDisplay} from "../../RcsbBoard/RcsbDisplay/RcsbFastSequenceDisplay";
-import {RcsbCompositeDisplay} from "../../RcsbBoard/RcsbDisplay/RcsbCompositeDisplay";
-import {RcsbBlockDisplay} from "../../RcsbBoard/RcsbDisplay/RcsbBlockDisplay";
-import {RcsbLineDisplay} from "../../RcsbBoard/RcsbDisplay/RcsbLineDisplay";
-import {RcsbAreaDisplay} from "../../RcsbBoard/RcsbDisplay/RcsbAreaDisplay";
-import {RcsbVariantDisplay} from "../../RcsbBoard/RcsbDisplay/RcsbVariantDisplay";
-import {RcsbVlineDisplay} from "../../RcsbBoard/RcsbDisplay/RcsbVlineDisplay";
-import {RcsbFvColorGradient} from "../../RcsbDataManager/RcsbDataManager";
-import {RcsbFvTooltipManager} from "../RcsbFvTooltip/RcsbFvTooltipManager";
-import {RcsbFvTooltip} from "../RcsbFvTooltip/RcsbFvTooltipImplementation/RcsbFvTooltip";
+import { RcsbAreaDisplay } from "../../RcsbBoard/RcsbDisplay/RcsbAreaDisplay";
+import { RcsbAxisDisplay } from "../../RcsbBoard/RcsbDisplay/RcsbAxisDisplay";
+import { RcsbBlockDisplay } from "../../RcsbBoard/RcsbDisplay/RcsbBlockDisplay";
+import { RcsbBondDisplay } from "../../RcsbBoard/RcsbDisplay/RcsbBondDisplay";
+import { RcsbCompositeDisplay } from "../../RcsbBoard/RcsbDisplay/RcsbCompositeDisplay";
+import { RcsbDisplayInterface } from "../../RcsbBoard/RcsbDisplay/RcsbDisplayInterface";
+import { RcsbFastSequenceDisplay } from "../../RcsbBoard/RcsbDisplay/RcsbFastSequenceDisplay";
+import { RcsbLineDisplay } from "../../RcsbBoard/RcsbDisplay/RcsbLineDisplay";
+import { RcsbPinDisplay } from "../../RcsbBoard/RcsbDisplay/RcsbPinDisplay";
+import { RcsbVariantDisplay } from "../../RcsbBoard/RcsbDisplay/RcsbVariantDisplay";
+import { RcsbVlineDisplay } from "../../RcsbBoard/RcsbDisplay/RcsbVlineDisplay";
+import { RcsbFvColorGradient } from "../../RcsbDataManager/RcsbDataManager";
+import { RcsbFvDisplayConfigInterface, RcsbFvRowExtendedConfigInterface } from "../RcsbFvConfig/RcsbFvConfigInterface";
+import { RcsbFvDisplayTypes } from '../RcsbFvConfig/RcsbFvDefaultConfigValues';
+import { RcsbFvTooltip } from "../RcsbFvTooltip/RcsbFvTooltipImplementation/RcsbFvTooltip";
+import { RcsbFvTooltipManager } from "../RcsbFvTooltip/RcsbFvTooltipManager";
 
 export class RcsbFvDisplay {
 
     private displayIds: Array<string> = [];
     private readonly displayConfig: RcsbFvRowExtendedConfigInterface;
+    private rootDom : Document | ShadowRoot;
 
-    constructor(config: RcsbFvRowExtendedConfigInterface){
+    constructor(rootDom: Document | ShadowRoot, config: RcsbFvRowExtendedConfigInterface){
         this.displayConfig = config;
+        this.rootDom = rootDom;
     }
 
     public initDisplay() : RcsbDisplayInterface{
         const config = this.displayConfig;
         if (typeof config.displayType === "string" && config.displayType != RcsbFvDisplayTypes.COMPOSITE) {
-            const out: RcsbDisplayInterface | null = RcsbFvDisplay.singleDisplay(config.displayType, config);
+            const out: RcsbDisplayInterface | null = this.singleDisplay(config.displayType, config);
             if(out!= null)
                 return out;
             else
@@ -58,7 +60,7 @@ export class RcsbFvDisplay {
                     displayConfig = RcsbFvDisplay.setDisplayConfig(config, config.displayConfig[i]);
                     i++;
                 }
-                const singleDisplay: RcsbDisplayInterface | null = RcsbFvDisplay.singleDisplay(displayType, displayConfig);
+                const singleDisplay = this.singleDisplay(displayType, displayConfig);
                 if( singleDisplay != null) {
                     display.addDisplay(displayId, singleDisplay);
                     this.displayIds.push(displayId);
@@ -73,7 +75,7 @@ export class RcsbFvDisplay {
         return {...config,...displayConfig};
     }
 
-    private static singleDisplay(type: string, config: RcsbFvRowExtendedConfigInterface): RcsbDisplayInterface {
+    private singleDisplay(type: string, config: RcsbFvRowExtendedConfigInterface): RcsbDisplayInterface {
         let out:RcsbDisplayInterface;
         if(config.boardId != undefined && config.trackId != undefined && config.displayColor != undefined) {
             switch (type) {
@@ -131,7 +133,7 @@ export class RcsbFvDisplay {
                     throw "Track type " + config.displayType + " is not supported";
             }
             configDisplay(out, config);
-            configTooltip(out, config);
+            configTooltip(this.rootDom, out, config);
         }else{
             console.error(config);
             throw "Single Display failed missing boardId or displayColor";
@@ -165,9 +167,10 @@ function configDisplay(display: RcsbDisplayInterface, config: RcsbFvRowExtendedC
     }
 }
 
-function configTooltip(display: RcsbDisplayInterface, config: RcsbFvRowExtendedConfigInterface){
+function configTooltip(root_dom: Document | ShadowRoot, display: RcsbDisplayInterface, config: RcsbFvRowExtendedConfigInterface){
     if(config.includeTooltip){
         const tooltipManager = new RcsbFvTooltipManager(
+            root_dom,
             config.boardId,
             config.tooltipGenerator ?? new RcsbFvTooltip()
         );

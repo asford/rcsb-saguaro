@@ -1,4 +1,4 @@
-import {zoom, ZoomBehavior, zoomIdentity, ZoomTransform} from "d3-zoom";
+import { zoom, ZoomBehavior, zoomIdentity, ZoomTransform } from "d3-zoom";
 
 import {
     MainGConfInterface,
@@ -8,23 +8,23 @@ import {
     ZoomConfigInterface
 } from "./RcsbD3/RcsbD3Manager";
 
-import classes from "../scss/RcsbBoard.module.scss";
-import {MOUSE} from "./RcsbD3/RcsbD3Constants";
+import { D3ZoomEvent } from "d3";
+import { asyncScheduler, Subject, Subscription } from "rxjs";
+import { RcsbFvTrackDataElementInterface } from "../RcsbDataManager/RcsbDataManager";
+import { RcsbFvDefaultConfigValues } from "../RcsbFv/RcsbFvConfig/RcsbFvDefaultConfigValues";
 import {
     CONDITIONAL_FLAG,
     EventType,
     RcsbFvContextManager,
     RcsbFvContextManagerType
 } from "../RcsbFv/RcsbFvContextManager/RcsbFvContextManager";
-import {RcsbDisplayInterface, RcsbTrackInterface} from "./RcsbDisplay/RcsbDisplayInterface";
-import {RcsbD3EventDispatcher} from "./RcsbD3/RcsbD3EventDispatcher";
-import {RcsbFvTrackDataElementInterface} from "../RcsbDataManager/RcsbDataManager";
-import {RcsbFvDefaultConfigValues} from "../RcsbFv/RcsbFvConfig/RcsbFvDefaultConfigValues";
-import {RcsbSelection} from "./RcsbSelection";
-import {asyncScheduler, Subject, Subscription} from "rxjs";
-import {RcsbScaleInterface} from "./RcsbD3/RcsbD3ScaleFactory";
-import {D3ZoomEvent} from "d3";
-import {RcsbWindowEventManager} from "./RcsbWindowEventManager";
+import classes from "../scss/RcsbBoard.module.scss";
+import { MOUSE } from "./RcsbD3/RcsbD3Constants";
+import { RcsbD3EventDispatcher } from "./RcsbD3/RcsbD3EventDispatcher";
+import { RcsbScaleInterface } from "./RcsbD3/RcsbD3ScaleFactory";
+import { RcsbDisplayInterface, RcsbTrackInterface } from "./RcsbDisplay/RcsbDisplayInterface";
+import { RcsbSelection } from "./RcsbSelection";
+import { RcsbWindowEventManager } from "./RcsbWindowEventManager";
 
 export interface LocationViewInterface {
     from: number;
@@ -92,10 +92,12 @@ export class RcsbBoard {
         this.contextManager = contextManager;
         this._xScale = xScale;
         this.selection = selection;
-        const boardDiv: HTMLElement | null = document.getElementById(this.domId);
+        const boardDiv: HTMLElement | null = this.contextManager.root.getElementById(this.domId);
+
         if(boardDiv == null){
             throw "Board DOM ["+this.domId+"] element not found. Removing scroll event handler from window";
         }
+
         this.boardDiv = boardDiv;
         RcsbWindowEventManager.intersectionObserve(this.boardDiv, this.scrollEvent);
     }
@@ -106,6 +108,7 @@ export class RcsbBoard {
 
     private addSVG():void {
         const svgConfig: SVGConfInterface = {
+            root_dom: this.contextManager.root,
             elementId: this.domId,
             svgClass: classes.rcsbSvg,
             domClass: classes.rcsbDom,

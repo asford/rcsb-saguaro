@@ -1,5 +1,10 @@
-import {createRoot, Root} from "react-dom/client";
-import {RcsbFvBoard, RcsbFvBoardFullConfigInterface} from "./RcsbFvBoard/RcsbFvBoard";
+import { createRoot, Root } from "react-dom/client";
+import uniqid from "uniqid";
+import { RcsbD3ScaleFactory, RcsbScaleInterface } from "../RcsbBoard/RcsbD3/RcsbD3ScaleFactory";
+import { RcsbSelection, SelectionInterface } from "../RcsbBoard/RcsbSelection";
+import { RcsbFvTrackData } from "../RcsbDataManager/RcsbDataManager";
+import { RcsbFvBoard, RcsbFvBoardFullConfigInterface } from "./RcsbFvBoard/RcsbFvBoard";
+import { BoardDataState } from "./RcsbFvBoard/Utils/BoardDataState";
 import {
     RcsbFvBoardConfigInterface,
     RcsbFvRowConfigInterface
@@ -7,14 +12,10 @@ import {
 import {
     EventType,
     RcsbFvContextManager,
-    TrackVisibilityInterface, SetSelectionInterface
+    SetSelectionInterface,
+    TrackVisibilityInterface
 } from "./RcsbFvContextManager/RcsbFvContextManager";
-import {RcsbFvTrackData} from "../RcsbDataManager/RcsbDataManager";
-import {RcsbSelection, SelectionInterface} from "../RcsbBoard/RcsbSelection";
-import {RcsbD3ScaleFactory, RcsbScaleInterface} from "../RcsbBoard/RcsbD3/RcsbD3ScaleFactory";
-import {BoardDataState} from "./RcsbFvBoard/Utils/BoardDataState";
-import uniqid from "uniqid";
-import {RcsbFvStateManager} from "./RcsbFvState/RcsbFvStateManager";
+import { RcsbFvStateManager } from "./RcsbFvState/RcsbFvStateManager";
 
 /**
  * Protein Feature Viewer (PFV) constructor interface
@@ -44,7 +45,7 @@ export class RcsbFv<
 >{
 
     /**rxjs event based handler used to communicate events (click, highlight, move) between board tracks*/
-    private readonly contextManager: RcsbFvContextManager = new RcsbFvContextManager();
+    private readonly contextManager: RcsbFvContextManager;
     /**Global board configuration*/
     private boardConfigData: RcsbFvBoardConfigInterface;
     /**DOM elemnt id where the board will be displayed*/
@@ -66,11 +67,30 @@ export class RcsbFv<
     private reactRoot: Root;
 
     constructor(props: RcsbFvInterface<P,S,R,M>){
+
+
         this.boardConfigData = props.boardConfigData;
         this.elementId = props.elementId;
         if(this.elementId===null || this.elementId===undefined){
             throw "FATAL ERROR: DOM elementId not found";
         }
+        function root_dom_for(element: HTMLElement) {
+            var current: ParentNode = element;
+            while(current && current.parentNode) {
+                if(current.parentNode === document) {
+                    return document;
+                } else if(current.parentNode instanceof ShadowRoot) {
+                    return current.parentNode;
+                } else {
+                    current = current.parentNode;
+                }
+            }
+            throw "Unable to resolve valid root DOM for element";
+        }
+
+        const root = (typeof this.elementId == "string") ? document : root_dom_for(this.elementId);
+        this.contextManager = new RcsbFvContextManager(root);
+
         this.boardDataSate = new BoardDataState<P,S,R,M>({
             contextManager: this.contextManager,
             boardId: this.boardId,
@@ -147,7 +167,7 @@ export class RcsbFv<
                 let node: HTMLElement|null;
 
                 if (typeof this.elementId == "string"){
-                    node = document.getElementById(this.elementId);
+                    node = this.contextManager.root.getElementById(this.elementId);
                     if(node==null)
                         throw `ERROR: HTML element ${this.elementId} not found`
                 } else {

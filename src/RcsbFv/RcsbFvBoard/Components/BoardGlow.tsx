@@ -1,10 +1,10 @@
 import React from "react";
-import {RcsbFvDOMConstants} from "../../RcsbFvConfig/RcsbFvDOMConstants";
+import { asyncScheduler, Subscription } from "rxjs";
 import classes from "../../../scss/RcsbFvRow.module.scss";
-import {asyncScheduler, Subscription} from "rxjs";
-import {RcsbFvDefaultConfigValues} from "../../RcsbFvConfig/RcsbFvDefaultConfigValues";
-import {RcsbFvBoardConfigInterface} from "../../RcsbFvConfig/RcsbFvConfigInterface";
-import {EventType, RcsbFvContextManager} from "../../RcsbFvContextManager/RcsbFvContextManager";
+import { RcsbFvBoardConfigInterface } from "../../RcsbFvConfig/RcsbFvConfigInterface";
+import { RcsbFvDefaultConfigValues } from "../../RcsbFvConfig/RcsbFvDefaultConfigValues";
+import { RcsbFvDOMConstants } from "../../RcsbFvConfig/RcsbFvDOMConstants";
+import { EventType, RcsbFvContextManager } from "../../RcsbFvContextManager/RcsbFvContextManager";
 
 interface BoardGlowInterface {
     readonly boardId:string;
@@ -54,12 +54,12 @@ export class BoardGlow extends React.Component <BoardGlowInterface> {
     private displayGlow(): void{
         if(this.hideTask)
             this.hideTask.unsubscribe();
-        const mainDiv: HTMLElement | null = document.getElementById(this.props.boardId);
+        const mainDiv: HTMLElement | null = this.props.contextManager.root.getElementById(this.props.boardId);
         if (mainDiv != null) {
             const mainDivSize: DOMRect = mainDiv.getBoundingClientRect();
             const axisDivSize: number = mainDiv.getElementsByClassName(classes.rcsbFvRowAxis)[0]?.getBoundingClientRect().height ?? 0;
             const height: number = mainDivSize.height - axisDivSize;
-            const glowDiv: HTMLElement | null = document.getElementById(this.props.boardId + RcsbFvDOMConstants.GLOW_DOM_ID_PREFIX);
+            const glowDiv: HTMLElement | null = this.props.contextManager.root.getElementById(this.props.boardId + RcsbFvDOMConstants.GLOW_DOM_ID_PREFIX);
             if (glowDiv != null) {
                 const innerGlowDiv: HTMLElement | undefined = glowDiv.getElementsByTagName("div")[0];
                 const trackWidth: number = (this.props.boardConfigData.trackWidth ?? 0) + 2*(this.props.boardConfigData.borderWidth ?? RcsbFvDefaultConfigValues.borderWidth);
@@ -74,7 +74,7 @@ export class BoardGlow extends React.Component <BoardGlowInterface> {
     }
 
     private hideGlow(): void {
-        const glowDiv: HTMLElement|null = document.getElementById(this.props.boardId+RcsbFvDOMConstants.GLOW_DOM_ID_PREFIX);
+        const glowDiv: HTMLElement|null = this.props.contextManager.root.getElementById(this.props.boardId+RcsbFvDOMConstants.GLOW_DOM_ID_PREFIX);
         if(glowDiv!=null){
             this.hideTask = asyncScheduler.schedule(()=>{
                 glowDiv.className = classes.rcsbNoGlow;

@@ -1,10 +1,10 @@
 import React from "react";
-import {RcsbFvDOMConstants} from "../../RcsbFvConfig/RcsbFvDOMConstants";
+import { Subscription } from "rxjs";
 import classes from "../../../scss/RcsbFvRow.module.scss";
-import {RcsbFvDefaultConfigValues} from "../../RcsbFvConfig/RcsbFvDefaultConfigValues";
-import {EventType, RcsbFvContextManager} from "../../RcsbFvContextManager/RcsbFvContextManager";
-import {Subscription} from "rxjs";
-import {RcsbFvBoardConfigInterface} from "../../RcsbFvConfig/RcsbFvConfigInterface";
+import { RcsbFvBoardConfigInterface } from "../../RcsbFvConfig/RcsbFvConfigInterface";
+import { RcsbFvDOMConstants } from "../../RcsbFvConfig/RcsbFvDOMConstants";
+import { RcsbFvDefaultConfigValues } from "../../RcsbFvConfig/RcsbFvDefaultConfigValues";
+import { EventType, RcsbFvContextManager } from "../../RcsbFvContextManager/RcsbFvContextManager";
 
 interface RowGlowInterface {
     readonly boardId: string;
@@ -49,12 +49,12 @@ export class RowGlow extends React.Component <RowGlowInterface>{
     }
 
     private displayGlow(id:string): void{
-        const boardDiv: HTMLElement | null = document.getElementById(this.props.boardId);
-        const rowDiv: HTMLElement | null = document.getElementById(id);
+        const boardDiv: HTMLElement | null = this.props.contextManager.root.getElementById(this.props.boardId);
+        const rowDiv: HTMLElement | null = this.props.contextManager.root.getElementById(id);
         if (rowDiv != null && boardDiv != null) {
             const top: number = rowDiv.offsetTop - boardDiv.offsetTop;
             const height: number = rowDiv.getBoundingClientRect().height - 2 * RcsbFvDefaultConfigValues.rowGlowWidth;
-            const glowDiv: HTMLElement | null = document.getElementById(this.props.boardId + RcsbFvDOMConstants.GLOW_ROW_DOM_ID_SUFFIX);
+            const glowDiv: HTMLElement | null = this.props.contextManager.root.getElementById(this.props.boardId + RcsbFvDOMConstants.GLOW_ROW_DOM_ID_SUFFIX);
             if (glowDiv != null) {
                 const innerGlowDiv: HTMLElement | undefined = glowDiv.getElementsByTagName("div")[0];
                 const trackWidth: number = this.props.boardConfigData.trackWidth ??  RcsbFvDefaultConfigValues.trackWidth;
@@ -69,7 +69,7 @@ export class RowGlow extends React.Component <RowGlowInterface>{
     }
 
     private hideGlow(): void{
-        const glowDiv: HTMLElement | null = document.getElementById(this.props.boardId + RcsbFvDOMConstants.GLOW_ROW_DOM_ID_SUFFIX);
+        const glowDiv: HTMLElement | null = this.props.contextManager.root.getElementById(this.props.boardId + RcsbFvDOMConstants.GLOW_ROW_DOM_ID_SUFFIX);
         if (glowDiv != null) {
             const innerGlowDiv: HTMLElement | undefined = glowDiv.getElementsByTagName("div")[0];
             glowDiv.style.top = "0px";

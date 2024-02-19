@@ -1,14 +1,16 @@
-import {RcsbD3Constants} from "./RcsbD3Constants";
-import {Selection, select, BaseType, pointer} from "d3-selection";
-import {ZoomBehavior, ZoomedElementBaseType} from "d3-zoom";
-import classes from "../../scss/RcsbBoard.module.scss";
+import { BaseType, Selection, pointer, select } from "d3-selection";
+import { ZoomBehavior, ZoomedElementBaseType } from "d3-zoom";
 import {
     RcsbFvTrackDataElementInterface
 } from "../../RcsbDataManager/RcsbDataManager";
-import {RcsbScaleInterface} from "./RcsbD3ScaleFactory";
-import {RcsbTrackInterface} from "../RcsbDisplay/RcsbDisplayInterface";
+import classes from "../../scss/RcsbBoard.module.scss";
+import { RcsbTrackInterface } from "../RcsbDisplay/RcsbDisplayInterface";
+import { RcsbD3Constants } from "./RcsbD3Constants";
+import { RcsbScaleInterface } from "./RcsbD3ScaleFactory";
 
 export interface SVGConfInterface  {
+    // Needs root reference
+    root_dom: Document | ShadowRoot;
     elementId: string,
     domClass: string;
     svgClass: string;
@@ -85,7 +87,7 @@ export class RcsbD3Manager {
     }
 
     buildSvgNode(config: SVGConfInterface): void {
-        this._dom = select(document.getElementById(config.elementId));
+        this._dom = select(config.root_dom.getElementById(config.elementId));
         this._dom.classed(config.domClass, true)
             .style(RcsbD3Constants.WIDTH, config.width + "px");
 
