@@ -30,7 +30,7 @@ export interface RcsbFvInterface <
     /**Board global configuration*/
     readonly boardConfigData: RcsbFvBoardConfigInterface;
     /**DOM element Id where the PFV will be rendered*/
-    readonly elementId: string;
+    readonly elementId: string | HTMLElement;
 }
 
 /**
@@ -48,7 +48,7 @@ export class RcsbFv<
     /**Global board configuration*/
     private boardConfigData: RcsbFvBoardConfigInterface;
     /**DOM elemnt id where the board will be displayed*/
-    private readonly elementId: string;
+    private readonly elementId: string | HTMLElement;
     /**Flag indicating that the React component has been mounted*/
     private mounted: boolean = false;
     /**Global d3 Xscale object shared among all board tracks*/
@@ -144,9 +144,16 @@ export class RcsbFv<
     public init(): Promise<void> {
         this.rcsbFvPromise = new Promise<void>((resolve, reject)=>{
             if(!this.mounted && this.boardConfigData != undefined) {
-                const node: HTMLElement|null = document.getElementById(this.elementId);
-                if(node==null)
-                    throw `ERROR: HTML element ${this.elementId} not found`
+                let node: HTMLElement|null;
+
+                if (typeof this.elementId == "string"){
+                    node = document.getElementById(this.elementId);
+                    if(node==null)
+                        throw `ERROR: HTML element ${this.elementId} not found`
+                } else {
+                    node = this.elementId;
+                }
+
                 this.reactRoot = createRoot(node);
                 this.reactRoot.render(<RcsbFvBoard
                     boardId={this.boardId}
