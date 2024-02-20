@@ -21,7 +21,8 @@
     "build-tsc": "tsc",
     "build-commonjs": "tsc --build tsconfig.commonjs.json",
     "clean": "del-cli lib && del-cli build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "updateDist": "npm run build && cp -f build/rcsb-saguaro* dist"
   },
   "repository": {
     "type": "git",
