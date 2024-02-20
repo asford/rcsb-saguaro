@@ -102,6 +102,10 @@ export class RcsbFv<
         //
         // So just do a scan through the root document, find our styles there, and inject into the shadow.
         // TODO this duplicates stylesheets on init?
+        //
+        // Potentially better to expose CSS styles as separate stylesheet to allow standard inclusion patterns
+        //
+        // https://www.developerhandbook.com/blog/webpack/how-to-configure-scss-modules-for-webpack/
         if (root instanceof ShadowRoot) {
             console.log("RcsvFv in shadow root.", this.elementId, root);
             Array.from(document.head.getElementsByTagName("style")).forEach((styles, i) => {
