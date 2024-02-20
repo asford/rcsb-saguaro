@@ -89,6 +89,32 @@ export class RcsbFv<
         }
 
         const root = (typeof this.elementId == "string") ? document : root_dom_for(this.elementId);
+        // RcsbFv ships as single-file webpack and directly injects styles into the root document.
+        //
+        // If target element is within a ShadowRoot, propogate styles into the shadow dom.
+        //
+        // There's very likely a correct way to do this, and/or just ship css separately,
+        // however we want to preserve the single-file inclusion experience.
+        // 
+        // Tried and failed:
+        // https://stackoverflow.com/questions/70177741/webpack-style-loader-insert-scss-into-shadow-dom
+        // https://dev.to/m4thieulavoie/how-i-managed-to-use-scss-inside-web-components-3lk9
+        //
+        // So just do a scan through the root document, find our styles there, and inject into the shadow.
+        // TODO this duplicates stylesheets on init?
+        if (root instanceof ShadowRoot) {
+            console.log("RcsvFv in shadow root.", this.elementId, root);
+            Array.from(document.head.getElementsByTagName("style")).forEach((styles, i) => {
+                if (!styles.innerText.includes(".rcsb")) {
+                    return;
+                }
+
+                const shadow_style = document.createElement("style");
+                shadow_style.innerText = styles.innerText;
+                root.appendChild(shadow_style);
+            });
+        }
+
         this.contextManager = new RcsbFvContextManager(root);
 
         this.boardDataSate = new BoardDataState<P,S,R,M>({
