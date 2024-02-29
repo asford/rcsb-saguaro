@@ -1,24 +1,23 @@
-import React from "react";
+import { computePosition, detectOverflow } from "@floating-ui/dom";
+import BxLeft from "boxicons/svg/regular/bx-left-arrow.svg";
+import BxMinus from "boxicons/svg/regular/bx-minus.svg";
+import BxPlus from "boxicons/svg/regular/bx-plus.svg";
+import BxRight from "boxicons/svg/regular/bx-right-arrow.svg";
+import BxDown from "boxicons/svg/solid/bxs-down-arrow.svg";
+import React, { ReactNode } from "react";
+import { CSSTransition } from "react-transition-group";
+import { Subscription, asyncScheduler } from "rxjs";
+import { RcsbScaleInterface } from "../../RcsbBoard/RcsbD3/RcsbD3ScaleFactory";
 import classes from "../../scss/RcsbFvRow.module.scss";
-import {RcsbFvDOMConstants} from "../RcsbFvConfig/RcsbFvDOMConstants";
-import {CSSTransition} from "react-transition-group";
-import {RcsbFvBoardConfigInterface} from "../RcsbFvConfig/RcsbFvConfigInterface";
-import {RcsbFvDefaultConfigValues} from "../RcsbFvConfig/RcsbFvDefaultConfigValues";
+import { RcsbFvBoardConfigInterface } from "../RcsbFvConfig/RcsbFvConfigInterface";
+import { RcsbFvDOMConstants } from "../RcsbFvConfig/RcsbFvDOMConstants";
+import { RcsbFvDefaultConfigValues } from "../RcsbFvConfig/RcsbFvDefaultConfigValues";
 import {
     DomainViewInterface,
     EventType,
     RcsbFvContextManager,
     RcsbFvContextManagerType
 } from "../RcsbFvContextManager/RcsbFvContextManager";
-import {asyncScheduler, Subscription} from "rxjs";
-import {RcsbScaleInterface} from "../../RcsbBoard/RcsbD3/RcsbD3ScaleFactory";
-import {computePosition, detectOverflow} from "@floating-ui/dom";
-import {ReactNode} from "react";
-import BxPlus from "boxicons/svg/regular/bx-plus.svg";
-import BxMinus from "boxicons/svg/regular/bx-minus.svg";
-import BxRight from "boxicons/svg/regular/bx-right-arrow.svg";
-import BxLeft from "boxicons/svg/regular/bx-left-arrow.svg";
-import BxDown from "boxicons/svg/solid/bxs-down-arrow.svg";
 
 export interface RcsbFvUIConfigInterface {
     readonly boardId: string;
@@ -111,11 +110,11 @@ export class RcsbFvUI extends React.Component<RcsbFvUIConfigInterface, RcsbFvUIS
 
     componentDidMount() {
         this.subscription = this.subscribe();
-        const refDiv: HTMLDivElement | null= document.querySelector("#"+this.props.boardId);
+        const refDiv: HTMLDivElement | null= this.props.contextManager.root.querySelector("#"+this.props.boardId);
         if(refDiv == null)
             throw "Main board DOM element not found";
         this.refDiv = refDiv;
-        const tooltipDiv: HTMLDivElement  | null= document.querySelector("#"+this.props.boardId+RcsbFvDOMConstants.UI_DOM_ID_PREFIX);
+        const tooltipDiv: HTMLDivElement  | null= this.props.contextManager.root.querySelector("#"+this.props.boardId+RcsbFvDOMConstants.UI_DOM_ID_PREFIX);
         if(tooltipDiv == null)
             throw "Tooltip DOM element not found";
         this.tooltipDiv = tooltipDiv;
@@ -172,7 +171,7 @@ export class RcsbFvUI extends React.Component<RcsbFvUIConfigInterface, RcsbFvUIS
     }
 
     private hideUI(): void{
-        const tooltipDiv: HTMLDivElement | null= document.querySelector("#"+this.props.boardId+RcsbFvDOMConstants.UI_DOM_ID_PREFIX);
+        const tooltipDiv: HTMLDivElement | null= this.props.contextManager.root.querySelector("#"+this.props.boardId+RcsbFvDOMConstants.UI_DOM_ID_PREFIX);
         if(tooltipDiv == null)
             return;
         this.hideTask = asyncScheduler.schedule(()=>{

@@ -1,9 +1,9 @@
+import { RcsbFv } from "../RcsbFv/RcsbFv";
 import {
     RcsbFvBoardConfigInterface,
     RcsbFvRowConfigInterface
 } from "../RcsbFv/RcsbFvConfig/RcsbFvConfigInterface";
-import {RcsbFv} from "../RcsbFv/RcsbFv";
-import {RcsbFvDisplayTypes} from "../RcsbFv/RcsbFvConfig/RcsbFvDefaultConfigValues";
+import { RcsbFvDisplayTypes } from "../RcsbFv/RcsbFvConfig/RcsbFvDefaultConfigValues";
 
 const sequence = "MTTQAPTFTQPLQSVVVLEGSTATFEAHISGFPVPEVSWFRDGQVISTSTLPGVQISFSD" +
     "GRAKLTIPAVTKANSGRYSLKATNGSGQATSTAELLVKAETAPPNFVQRLQSMTVRQGSQ" +
@@ -89,11 +89,14 @@ const sequenceConfigData: RcsbFvRowConfigInterface[] = [
         ]
     }];
 
-const element = document.getElementById("pfv");
-
-if (element == null){
-    throw "Unable to locate element";
+const host = document.getElementById("pfv");
+if (host == null){
+    throw "Unable to create host"
 }
+const shadow = host.attachShadow({ mode: "open" });
+const element = document.createElement("div");
+element.id="pfv-internal";
+shadow.appendChild(element);
 
 const fv = new RcsbFv({elementId:element, boardConfigData, rowConfigData: [...sequenceConfigData, ...rowConfigData]});
 fv.then(()=>{

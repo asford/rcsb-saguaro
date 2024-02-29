@@ -1,23 +1,23 @@
-import {RcsbBoard} from '../../RcsbBoard/RcsbBoard';
-import {RcsbFvDefaultConfigValues, RcsbFvDisplayTypes} from '../RcsbFvConfig/RcsbFvDefaultConfigValues';
-import {RcsbFvDisplay} from "./RcsbFvDisplay";
-import {RcsbFvConfig} from "../RcsbFvConfig/RcsbFvConfig";
-import {RcsbFvRowExtendedConfigInterface} from "../RcsbFvConfig/RcsbFvConfigInterface";
+import { Subscription } from "rxjs";
+import { RcsbBoard } from '../../RcsbBoard/RcsbBoard';
+import { RcsbScaleInterface } from "../../RcsbBoard/RcsbD3/RcsbD3ScaleFactory";
+import { RcsbCompositeDisplay } from "../../RcsbBoard/RcsbDisplay/RcsbCompositeDisplay";
+import { RcsbDisplayInterface } from "../../RcsbBoard/RcsbDisplay/RcsbDisplayInterface";
+import { RcsbSelection } from "../../RcsbBoard/RcsbSelection";
 import {
-    RcsbFvTrackData,
     RcsbDataManager,
+    RcsbFvTrackData,
     RcsbFvTrackDataMap
 } from "../../RcsbDataManager/RcsbDataManager";
-import {RcsbDisplayInterface} from "../../RcsbBoard/RcsbDisplay/RcsbDisplayInterface";
+import { RcsbFvConfig } from "../RcsbFvConfig/RcsbFvConfig";
+import { RcsbFvRowExtendedConfigInterface } from "../RcsbFvConfig/RcsbFvConfigInterface";
+import { RcsbFvDefaultConfigValues, RcsbFvDisplayTypes } from '../RcsbFvConfig/RcsbFvDefaultConfigValues';
 import {
     EventType,
     RcsbFvContextManager,
     RcsbFvContextManagerType, SelectionInterface
 } from "../RcsbFvContextManager/RcsbFvContextManager";
-import {Subscription} from "rxjs";
-import {RcsbCompositeDisplay} from "../../RcsbBoard/RcsbDisplay/RcsbCompositeDisplay";
-import {RcsbSelection} from "../../RcsbBoard/RcsbSelection";
-import {RcsbScaleInterface} from "../../RcsbBoard/RcsbD3/RcsbD3ScaleFactory";
+import { RcsbFvDisplay } from "./RcsbFvDisplay";
 
 /**This className provides  an abstraction layer to build and manage a particular board annotation cell*/
 export class RcsbFvTrack {
@@ -49,7 +49,7 @@ export class RcsbFvTrack {
         this.contextManager = contextManager;
         this.xScale = xScale;
         this.selection = selection;
-        if (typeof args.elementId === "string" && document.getElementById(args.elementId) != null) {
+        if (typeof args.elementId === "string" && this.contextManager.root.getElementById(args.elementId) != null) {
             this.rcsbBoard = new RcsbBoard(args.elementId, xScale, this.selection, this.contextManager);
         }
         this.buildTrack(args);
@@ -82,7 +82,7 @@ export class RcsbFvTrack {
      * @param elementId DOM element Id
      * */
     public init(elementId: string) : void{
-        if(document.getElementById(elementId)!= null) {
+        if(this.contextManager.root.getElementById(elementId)!= null) {
             this.elementId = elementId;
             if(this.rcsbBoard === null){
                 this.rcsbBoard = new RcsbBoard(this.elementId, this.xScale, this.selection, this.contextManager);
@@ -136,7 +136,7 @@ export class RcsbFvTrack {
      * @return Inner track display object
      * */
     private buildRcsbTrack(): RcsbDisplayInterface{
-        this.rcsbFvDisplay = new RcsbFvDisplay(this.rcsbFvConfig);
+        this.rcsbFvDisplay = new RcsbFvDisplay(this.contextManager.root, this.rcsbFvConfig);
         const rcsbTrack: RcsbDisplayInterface = this.rcsbFvDisplay.initDisplay();
         rcsbTrack.height( this.rcsbFvConfig.trackHeight );
         rcsbTrack.trackColor( this.rcsbFvConfig.trackColor );

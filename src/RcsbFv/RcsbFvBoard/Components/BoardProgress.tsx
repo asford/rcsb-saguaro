@@ -1,11 +1,11 @@
+import { computePosition, detectOverflow } from "@floating-ui/dom";
 import React from "react";
-import {RcsbFvDOMConstants} from "../../RcsbFvConfig/RcsbFvDOMConstants";
+import { Subscription } from "rxjs";
 import classes from "../../../scss/RcsbFvRow.module.scss";
-import {RcsbFvDefaultConfigValues} from "../../RcsbFvConfig/RcsbFvDefaultConfigValues";
-import {RcsbFvBoardConfigInterface, RcsbFvRowExtendedConfigInterface} from "../../RcsbFvConfig/RcsbFvConfigInterface";
-import {Subscription} from "rxjs";
-import {EventType, RcsbFvContextManager} from "../../RcsbFvContextManager/RcsbFvContextManager";
-import {computePosition, detectOverflow} from "@floating-ui/dom";
+import { RcsbFvBoardConfigInterface, RcsbFvRowExtendedConfigInterface } from "../../RcsbFvConfig/RcsbFvConfigInterface";
+import { RcsbFvDOMConstants } from "../../RcsbFvConfig/RcsbFvDOMConstants";
+import { RcsbFvDefaultConfigValues } from "../../RcsbFvConfig/RcsbFvDefaultConfigValues";
+import { EventType, RcsbFvContextManager } from "../../RcsbFvContextManager/RcsbFvContextManager";
 
 interface BoardProgressInterface {
     readonly boardId:string;
@@ -26,11 +26,12 @@ export class BoardProgress extends React.Component <BoardProgressInterface> {
 
     componentDidMount(): void {
         this.subscription = this.subscribe();
-        const refDiv: HTMLDivElement | null= document.querySelector("#"+this.props.boardId);
+        const refDiv: HTMLDivElement | null= this.props.contextManager.root.querySelector("#"+this.props.boardId);
+        console.log("reflookup", this.props.contextManager.root, refDiv)
         if(refDiv == null)
-            throw "Main board DOM element not found";
+            throw "BoardProgress Main board DOM element not found";
         this.refDiv = refDiv;
-        const tooltipDiv: HTMLDivElement  | null= document.querySelector("#"+this.props.boardId+RcsbFvDOMConstants.PROGRESS_DIV_DOM_ID_PREFIX);
+        const tooltipDiv: HTMLDivElement  | null= this.props.contextManager.root.querySelector("#"+this.props.boardId+RcsbFvDOMConstants.PROGRESS_DIV_DOM_ID_PREFIX);
         if(tooltipDiv == null)
             throw "Tooltip DOM element not found";
         this.tooltipDiv = tooltipDiv;
@@ -60,7 +61,7 @@ export class BoardProgress extends React.Component <BoardProgressInterface> {
         }else{
             if(this.tooltipDiv.style.visibility == 'hidden')
                 this.showStatus();
-            const statusDiv : HTMLElement | null = document.querySelector("#"+this.props.boardId+RcsbFvDOMConstants.PROGRESS_DIV_DOM_ID_PREFIX+" > span");
+            const statusDiv : HTMLElement | null = this.props.contextManager.root.querySelector("#"+this.props.boardId+RcsbFvDOMConstants.PROGRESS_DIV_DOM_ID_PREFIX+" > span");
             if(statusDiv != null)
                 statusDiv.innerHTML = fraction.toString()+"%";
         }

@@ -1,5 +1,10 @@
-import {createRoot, Root} from "react-dom/client";
-import {RcsbFvBoard, RcsbFvBoardFullConfigInterface} from "./RcsbFvBoard/RcsbFvBoard";
+import { createRoot, Root } from "react-dom/client";
+import uniqid from "uniqid";
+import { RcsbD3ScaleFactory, RcsbScaleInterface } from "../RcsbBoard/RcsbD3/RcsbD3ScaleFactory";
+import { RcsbSelection, SelectionInterface } from "../RcsbBoard/RcsbSelection";
+import { RcsbFvTrackData } from "../RcsbDataManager/RcsbDataManager";
+import { RcsbFvBoard, RcsbFvBoardFullConfigInterface } from "./RcsbFvBoard/RcsbFvBoard";
+import { BoardDataState } from "./RcsbFvBoard/Utils/BoardDataState";
 import {
     RcsbFvBoardConfigInterface,
     RcsbFvRowConfigInterface
@@ -7,14 +12,10 @@ import {
 import {
     EventType,
     RcsbFvContextManager,
-    TrackVisibilityInterface, SetSelectionInterface
+    SetSelectionInterface,
+    TrackVisibilityInterface
 } from "./RcsbFvContextManager/RcsbFvContextManager";
-import {RcsbFvTrackData} from "../RcsbDataManager/RcsbDataManager";
-import {RcsbSelection, SelectionInterface} from "../RcsbBoard/RcsbSelection";
-import {RcsbD3ScaleFactory, RcsbScaleInterface} from "../RcsbBoard/RcsbD3/RcsbD3ScaleFactory";
-import {BoardDataState} from "./RcsbFvBoard/Utils/BoardDataState";
-import uniqid from "uniqid";
-import {RcsbFvStateManager} from "./RcsbFvState/RcsbFvStateManager";
+import { RcsbFvStateManager } from "./RcsbFvState/RcsbFvStateManager";
 
 /**
  * Protein Feature Viewer (PFV) constructor interface
@@ -44,7 +45,7 @@ export class RcsbFv<
 >{
 
     /**rxjs event based handler used to communicate events (click, highlight, move) between board tracks*/
-    private readonly contextManager: RcsbFvContextManager = new RcsbFvContextManager();
+    private readonly contextManager: RcsbFvContextManager;
     /**Global board configuration*/
     private boardConfigData: RcsbFvBoardConfigInterface;
     /**DOM elemnt id where the board will be displayed*/
@@ -66,11 +67,60 @@ export class RcsbFv<
     private reactRoot: Root;
 
     constructor(props: RcsbFvInterface<P,S,R,M>){
+
+
         this.boardConfigData = props.boardConfigData;
         this.elementId = props.elementId;
         if(this.elementId===null || this.elementId===undefined){
             throw "FATAL ERROR: DOM elementId not found";
         }
+        function root_dom_for(element: HTMLElement) {
+            var current: ParentNode = element;
+            while(current && current.parentNode) {
+                if(current.parentNode === document) {
+                    return document;
+                } else if(current.parentNode instanceof ShadowRoot) {
+                    return current.parentNode;
+                } else {
+                    current = current.parentNode;
+                }
+            }
+            throw "Unable to resolve valid root DOM for element";
+        }
+
+        const root = (typeof this.elementId == "string") ? document : root_dom_for(this.elementId);
+        // RcsbFv ships as single-file webpack and directly injects styles into the root document.
+        //
+        // If target element is within a ShadowRoot, propogate styles into the shadow dom.
+        //
+        // There's very likely a correct way to do this, and/or just ship css separately,
+        // however we want to preserve the single-file inclusion experience.
+        // 
+        // Tried and failed:
+        // https://stackoverflow.com/questions/70177741/webpack-style-loader-insert-scss-into-shadow-dom
+        // https://dev.to/m4thieulavoie/how-i-managed-to-use-scss-inside-web-components-3lk9
+        //
+        // So just do a scan through the root document, find our styles there, and inject into the shadow.
+        // TODO this duplicates stylesheets on init?
+        //
+        // Potentially better to expose CSS styles as separate stylesheet to allow standard inclusion patterns
+        //
+        // https://www.developerhandbook.com/blog/webpack/how-to-configure-scss-modules-for-webpack/
+        if (root instanceof ShadowRoot) {
+            console.log("RcsvFv in shadow root.", this.elementId, root);
+            Array.from(document.head.getElementsByTagName("style")).forEach((styles, i) => {
+                if (!styles.innerText.includes(".rcsb")) {
+                    return;
+                }
+
+                const shadow_style = document.createElement("style");
+                shadow_style.innerText = styles.innerText;
+                root.appendChild(shadow_style);
+            });
+        }
+
+        this.contextManager = new RcsbFvContextManager(root);
+
         this.boardDataSate = new BoardDataState<P,S,R,M>({
             contextManager: this.contextManager,
             boardId: this.boardId,
@@ -147,7 +197,7 @@ export class RcsbFv<
                 let node: HTMLElement|null;
 
                 if (typeof this.elementId == "string"){
-                    node = document.getElementById(this.elementId);
+                    node = this.contextManager.root.getElementById(this.elementId);
                     if(node==null)
                         throw `ERROR: HTML element ${this.elementId} not found`
                 } else {

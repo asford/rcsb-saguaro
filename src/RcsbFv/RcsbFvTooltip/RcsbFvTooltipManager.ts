@@ -1,7 +1,7 @@
-import {RcsbFvDOMConstants} from "../RcsbFvConfig/RcsbFvDOMConstants";
-import {computePosition, detectOverflow} from "@floating-ui/dom";
-import {RcsbFvTrackDataElementInterface} from "../../RcsbDataManager/RcsbDataManager";
-import {RcsbFvTooltipInterface} from "./RcsbFvTooltipInterface";
+import { computePosition, detectOverflow } from "@floating-ui/dom";
+import { RcsbFvTrackDataElementInterface } from "../../RcsbDataManager/RcsbDataManager";
+import { RcsbFvDOMConstants } from "../RcsbFvConfig/RcsbFvDOMConstants";
+import { RcsbFvTooltipInterface } from "./RcsbFvTooltipInterface";
 
 export class RcsbFvTooltipManager {
 
@@ -11,18 +11,18 @@ export class RcsbFvTooltipManager {
     private readonly refDiv: HTMLDivElement;
     private readonly tooltip: RcsbFvTooltipInterface;
 
-    constructor(boardId: string, tooltip: RcsbFvTooltipInterface) {
+    constructor(root_dom: Document|ShadowRoot, boardId: string, tooltip: RcsbFvTooltipInterface) {
         this.boardId = boardId;
         this.tooltip = tooltip;
-        const refDiv: HTMLDivElement | null= document.querySelector("#"+this.boardId);
+        const refDiv: HTMLDivElement | null= root_dom.querySelector("#"+this.boardId);
         if(refDiv == null)
             throw "Main board DOM element not found";
         this.refDiv = refDiv;
-        const tooltipDiv: HTMLDivElement  | null= document.querySelector("#"+this.boardId+RcsbFvDOMConstants.TOOLTIP_DOM_ID_PREFIX);
+        const tooltipDiv: HTMLDivElement  | null= root_dom.querySelector("#"+this.boardId+RcsbFvDOMConstants.TOOLTIP_DOM_ID_PREFIX);
         if(tooltipDiv == null)
             throw "Tooltip DOM element not found";
         this.tooltipDiv = tooltipDiv;
-        const tooltipDescriptionDiv: HTMLDivElement | null = document.querySelector("#"+this.boardId+RcsbFvDOMConstants.TOOLTIP_DESCRIPTION_DOM_ID_PREFIX);
+        const tooltipDescriptionDiv: HTMLDivElement | null = root_dom.querySelector("#"+this.boardId+RcsbFvDOMConstants.TOOLTIP_DESCRIPTION_DOM_ID_PREFIX);
         if(tooltipDescriptionDiv == null)
             throw "Tooltip DOM element not found";
         this.tooltipDescriptionDiv = tooltipDescriptionDiv;
