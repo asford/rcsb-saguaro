@@ -148,7 +148,6 @@ export class RcsbFv<
                 
                 if(node==null)
                     throw `ERROR: HTML element ${this.elementId} not found`
-                }
                 this.reactRoot = createRoot(node);
                 this.reactRoot.render(<RcsbFvBoard
                     boardId={this.boardId}
