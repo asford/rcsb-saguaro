@@ -144,16 +144,11 @@ export class RcsbFv<
     public init(): Promise<void> {
         this.rcsbFvPromise = new Promise<void>((resolve, reject)=>{
             if(!this.mounted && this.boardConfigData != undefined) {
-                let node: HTMLElement|null;
-
-                if (typeof this.elementId == "string"){
-                    node = document.getElementById(this.elementId);
-                    if(node==null)
-                        throw `ERROR: HTML element ${this.elementId} not found`
-                } else {
-                    node = this.elementId;
+                const node: HTMLElement|null =  (typeof this.elementId == "string") ? document.getElementById(this.elementId) : this.elementId;
+                
+                if(node==null)
+                    throw `ERROR: HTML element ${this.elementId} not found`
                 }
-
                 this.reactRoot = createRoot(node);
                 this.reactRoot.render(<RcsbFvBoard
                     boardId={this.boardId}
